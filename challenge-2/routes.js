@@ -11,9 +11,9 @@ module.exports = {
       handler: async (request, h) => {
         try {
           const payload = request.payload;
-          const exists = await Employee.find({$email: payload.email});
+          const exists = Employee.find({$email: payload.email});
           if (exists) return Boom.badRequest('Email Exists');
-          const saved = await Employee.Save({
+          const saved = Employee.save({
             firstName: payload.firstName,
             lastName: payload.lastName,
             email: payload.email,
@@ -67,7 +67,7 @@ module.exports = {
       path: '/employees/{id}',
       handler: (request, h) => {
         try {
-          const employee = await Employee.find({$id: request.params.id});
+          const employee = Employee.find({$id: request.params.id});
           return employee
         } catch (e) {
           console.error(e);
