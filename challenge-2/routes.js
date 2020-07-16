@@ -12,15 +12,23 @@ module.exports = {
         try {
           const payload = request.payload;
           const exists = Employee.find({$email: payload.email});
-          if (exists) return Boom.badRequest('Email Exists');
-          const saved = Employee.save({
-            firstName: payload.firstName,
-            lastName: payload.lastName,
-            email: payload.email,
-            phone: payload.phone,
-            role: payload.role
-          });
-          return saved;
+          return exists.then(
+            result => {return result},
+            error => {return error}
+          ).then(
+            result => {
+              if (typeof result !== 'undefined' && result) return Boom.badRequest('Email Exists');
+              const saved = Employee.save({
+                firstName: payload.firstName,
+                lastName: payload.lastName,
+                email: payload.email,
+                phone: payload.phone,
+                role: payload.role
+              });
+              return saved;
+            },
+            error => {return Boom.badImplementation(error)}
+          );
         } catch (e) {
           console.error(e);
           return Boom.badImplementation(e);
@@ -47,7 +55,16 @@ module.exports = {
           const employees = Employee.findAll({
             $role: request.query.role
           });
-          return employees.map(employee => employee);
+          return employees.then(
+            result => {return result},
+            error => {return error;}
+          ).then(
+            result => {
+              if (typeof result === 'undefined') return Boom.badRequest('Does not Exist');
+              return result
+            },
+            error => {return Boom.badImplementation(error);}
+          );
         } catch (e) {
           console.error(e);
           return Boom.badImplementation(e);
@@ -68,7 +85,15 @@ module.exports = {
       handler: (request, h) => {
         try {
           const employee = Employee.find({$id: request.params.id});
-          return employee
+          return employee.then(
+            result => {return result},
+          ).then(
+            result => {
+              if (typeof result === 'undefined') return Boom.badRequest('Does not Exist');
+              return result
+            },
+            error => {return Boom.badImplementation(error);}
+          )
         } catch (e) {
           console.error(e);
           return Boom.badImplementation(e);
@@ -83,10 +108,5 @@ module.exports = {
         }
       }
     })
-
-    // TODO:
-    // /employees/{id}
-    // Employee.find
-
   }
 }
